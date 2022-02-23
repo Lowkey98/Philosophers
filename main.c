@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/23 20:29:39 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/02/23 20:43:09 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,11 +130,11 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 		return (1);
 	if (fetch_fork_data(&fork_list, argv_data.number_of_philo) == 1)
 		return (1);
-	*philo_data = malloc(sizeof(t_philo)  * argv_data.number_of_philo);
+	philo_data = malloc(sizeof(t_philo *)  * argv_data.number_of_philo);
 	while (i <  argv_data.number_of_philo)
 	{
-		*philo_data = malloc(sizeof(t_philo));
-		*philo_data[i]->argv_data = argv_data;
+		philo_data[i] = malloc(sizeof(t_philo));
+		philo_data[i]->argv_data = &argv_data;
 		i++;
 	}
 	// philo_data->argv_data = argv_data;
