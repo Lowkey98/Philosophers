@@ -1,7 +1,7 @@
 CC		= gcc
 CFLAGS	= -Wall -Werror -Wextra
 NAME	= philo
-SRC		= main.c
+SRC		= main.c ft_atoi.c ft_putstr_fd.c
 
 all: $(NAME)
 
