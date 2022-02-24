@@ -18,6 +18,7 @@ typedef struct s_philo {
     pthread_mutex_t *right_fork;
     pthread_mutex_t *left_fork;
     t_argv  *argv_data;
+    int     philo_id;
 } t_philo;
 
 void	ft_putstr_fd(char *s, int fd);

@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/23 20:43:09 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/02/24 11:11:50 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,11 +39,11 @@ void *func(void *vargp)
 	{
 		pthread_mutex_lock(data->left_fork);
 		pthread_mutex_lock(data->right_fork);
-		printf("philo %d eating\n",data->philo_n);
+		printf("philo %d eating\n",data->philo_id);
 		sleep(1);
 		pthread_mutex_unlock(data->left_fork);
 		pthread_mutex_unlock(data->right_fork);
-		printf("philo %d sleeping\n",data->philo_n);
+		// printf("philo %d sleeping\n",data->philo_n);
 		sleep(2);
 	}
 	// printf("value =%d\n", a);
@@ -108,10 +108,10 @@ int		fetch_fork_data(pthread_mutex_t **forks, int n_philo)
 	*forks = malloc(sizeof(pthread_mutex_t) * n_philo);
 	while (i < n_philo)
 	{
-		pthread_mutex_init(forks[i], NULL);
+		pthread_mutex_init(&(*forks)[i], NULL);
 		i++;
 	}
-	
+	return (0);
 }
 
 int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
@@ -130,17 +130,39 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 		return (1);
 	if (fetch_fork_data(&fork_list, argv_data.number_of_philo) == 1)
 		return (1);
-	philo_data = malloc(sizeof(t_philo *)  * argv_data.number_of_philo);
+	*philo_data = malloc(sizeof(t_philo )  * argv_data.number_of_philo);
 	while (i <  argv_data.number_of_philo)
 	{
-		philo_data[i] = malloc(sizeof(t_philo));
-		philo_data[i]->argv_data = &argv_data;
+		//philo_data[i] = malloc(sizeof(t_philo));
+		// printf("%d\n",argv_data.number_of_philo);
+		(*philo_data)[i].left_fork = &fork_list[i];
+		(*philo_data)[i].philo_id = i + 1;
+		(*philo_data)[i].right_fork = &fork_list[(i + 1) % argv_data.number_of_philo];
+		(*philo_data)[i].argv_data = &argv_data;
 		i++;
 	}
+	printf("%d\n", (*philo_data)[1].argv_data->time_to_die);
 	// philo_data->argv_data = argv_data;
+
 	return (0);
 }
 
+int	create_philos(t_philo *philo_data)
+{
+	int i;
+	pthread_t *thread_id_list;
+
+	thread_id_list = malloc(sizeof(pthread_t) * philo_data->argv_data->number_of_philo);
+
+	i = 0;
+	while (i < philo_data->argv_data->number_of_philo)
+	{
+		pthread_create(&thread_id_list[i], NULL, func, &philo_data[i]);
+		i++;	
+	}
+	// printf("%d\n", philo_data->argv_data->number_of_philo);
+	return (0);
+}
 
 int main(int argc, char **argv)
 {
@@ -150,12 +172,14 @@ int main(int argc, char **argv)
 	// printf("%d\n",tv.tv_usec);
 	//printf("%d\n", get_current_time_msec(t_zero));
 	t_philo *philo_data;
-	pthread_t *thread_id_list;
-	// thread_id_list = malloc(sizeof(pthread_t) * argv_data);
 
 	if (fetch_philo_data(&philo_data, argv, argc) == 1)
 		return (1);
-		
+	// printf("%d\n", philo_data[2].argv_data->time_to_die);
+	// exit(0);
+	create_philos(philo_data);
+	while(1);
+	//printf("%d", philo_data->argv_data->number_of_eats);
 	// pthread_t *thread_list;
 	
 	// thread_list = malloc(sizeof(pthread_t) * atoi(argv[1]));
