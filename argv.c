@@ -6,21 +6,23 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/24 12:40:11 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/24 12:40:40 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/02/25 15:43:36 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 # include "philosophers.h"
 
-int fetch_argv_data(t_argv *argv_data, char **argv)
+int fetch_argv_data(t_argv **argv_data, char **argv)
 {
-	argv_data->number_of_philo = ft_atoi(argv[1]);
-	argv_data->time_to_die = ft_atoi(argv[2]);
-	argv_data->time_to_eat = ft_atoi(argv[3]);
-	argv_data->time_to_sleep = ft_atoi(argv[4]);
-	argv_data->number_of_eats = -1;
+
+	*argv_data = malloc(sizeof(t_argv));	
+	(*argv_data)->number_of_philo = ft_atoi(argv[1]);
+	(*argv_data)->time_to_die = ft_atoi(argv[2]);
+	(*argv_data)->time_to_eat = ft_atoi(argv[3]);
+	(*argv_data)->time_to_sleep = ft_atoi(argv[4]);
+	(*argv_data)->number_of_eats = -1;
 	if (argv[5])
-		argv_data->number_of_eats = ft_atoi(argv[5]);
+		(*argv_data)->number_of_eats = ft_atoi(argv[5]);
 	return (0);
 }
 int		arg_error(char *str)
