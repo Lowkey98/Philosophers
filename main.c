@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/28 10:18:18 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/02/28 11:39:38 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,7 +102,7 @@ void check_deaths(t_philo *philo_data, int t_zero)
 			if (get_current_time_msec(t_zero) - philo_data[i].last_ate > philo_data[i].argv_data->time_to_die) 
 			{
 				printf("%d ms: philo %d DIED\n",get_current_time_msec(t_zero), philo_data[i].philo_id);
-				exit(0);
+				return ;
 			}
 			i++;			
 		}
@@ -110,25 +110,31 @@ void check_deaths(t_philo *philo_data, int t_zero)
 	}
 }
 
-int	create_philos(t_philo *philo_data)
+void	create_philo_set(int i, t_philo *philo_data, int t_zero)
 {
-	int i;
 	pthread_t *thread_id_list;
-	int t_zero;
-	
-	thread_id_list = malloc(sizeof(pthread_t) * philo_data->argv_data->number_of_philo);
 
-	i = 0;
-	t_zero = get_t_zero();
-	// printf("--%d--\n", philo_data[i].argv_data->number_of_philo);
+	thread_id_list = malloc(sizeof(pthread_t) * philo_data->argv_data->number_of_philo);
 	while (i < philo_data->argv_data->number_of_philo)
 	{
 		philo_data[i].t_zero = t_zero;
 		philo_data[i].last_ate = get_current_time_msec(t_zero);
 		pthread_create(&thread_id_list[i], NULL, func, &philo_data[i]);
-		usleep(10000);
-		i++;	
-	}
+		// usleep(10000);
+		i += 2;
+	}	
+}
+
+int	start_philos(t_philo *philo_data)
+{
+	int i;
+	int t_zero;
+	
+	i = 0;
+	t_zero = get_t_zero();
+	// printf("--%d--\n", philo_data[i].argv_data->number_of_philo);
+	create_philo_set(0, philo_data, t_zero);
+	create_philo_set(1, philo_data, t_zero);
 	// i = 0;
 	// while (i < philo_data->argv_data->number_of_philo)
 	// {
@@ -147,7 +153,7 @@ int main(int argc, char **argv)
 	if (fetch_philo_data(&philo_data, argv, argc) == 1)
 		return (1);
 	// printf("test : %d\n", philo_data[0].argv_data->number_of_philo);
-	create_philos(philo_data);
+	start_philos(philo_data);
 	
 
 	
