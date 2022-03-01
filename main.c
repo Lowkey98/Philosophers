@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/28 11:39:38 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/01 17:48:16 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,7 @@ void *func(void *vargp)
 		usleep(data->argv_data->time_to_eat * 1000);
 		pthread_mutex_unlock(data->left_fork);
 		pthread_mutex_unlock(data->right_fork);
+		data->times_ate++;
 		data->last_ate = get_current_time_msec(data->t_zero);
 		printf("%dms:philo %d sleeping\n", get_current_time_msec(data->t_zero),data->philo_id);
 		usleep(data->argv_data->time_to_sleep * 1000);
@@ -93,7 +94,10 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 void check_deaths(t_philo *philo_data, int t_zero)
 {
 	int i;
+	int ate_flag;
 
+
+	ate_flag = 0;
 	i = 0;
 	while(1)
 	{
@@ -104,8 +108,21 @@ void check_deaths(t_philo *philo_data, int t_zero)
 				printf("%d ms: philo %d DIED\n",get_current_time_msec(t_zero), philo_data[i].philo_id);
 				return ;
 			}
-			i++;			
+			if (philo_data->argv_data->number_of_eats != -1)
+			{
+				if (philo_data[i].times_ate < philo_data->argv_data->number_of_eats )
+					ate_flag = 1;
+			}
+			
+			i++;
+						
 		}
+		if (ate_flag == 0 && philo_data->argv_data->number_of_eats != -1)
+		{
+			printf("EVERYONE ATE atleast %d times\n", philo_data->argv_data->number_of_eats);
+			return;
+		}
+		ate_flag = 0;
 		i = 0;
 	}
 }
@@ -118,6 +135,7 @@ void	create_philo_set(int i, t_philo *philo_data, int t_zero)
 	while (i < philo_data->argv_data->number_of_philo)
 	{
 		philo_data[i].t_zero = t_zero;
+		philo_data[i].times_ate = 0;		
 		philo_data[i].last_ate = get_current_time_msec(t_zero);
 		pthread_create(&thread_id_list[i], NULL, func, &philo_data[i]);
 		// usleep(10000);

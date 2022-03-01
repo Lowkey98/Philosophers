@@ -21,6 +21,7 @@ typedef struct s_philo {
     int     philo_id;
     long    t_zero;
     int     last_ate;
+    int     times_ate;
 
 } t_philo;
 
