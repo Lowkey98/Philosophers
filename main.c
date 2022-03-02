@@ -6,16 +6,23 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/03/01 17:48:16 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/02 10:28:03 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philosophers.h"
 
+pthread_mutex_t	*lock_and_print(pthread_mutex_t *mutex, char *str, int arg_one, int arg_two)
+{
+		pthread_mutex_lock(mutex);
+		printf(str, get_current_time_msec(arg_one), arg_two);
+		pthread_mutex_unlock(mutex);
+		return (mutex);
+}
 
 void *func(void *vargp)
 {
-	printf("-------------\n");
+	// printf("-------------\n");
 	t_philo *data;
 
 	data = vargp; 
@@ -24,18 +31,19 @@ void *func(void *vargp)
 	while(1)
 	{
 		pthread_mutex_lock(data->left_fork);
-		printf("%dms:philo %d has taking left fork\n",get_current_time_msec(data->t_zero),data->philo_id);
+		lock_and_print(data->print_mutex, "%dms:philo %d has taking left fork\n", data->t_zero, data->philo_id );
+
 		pthread_mutex_lock(data->right_fork);
-		printf("%dms:philo %d has taking right fork\n",get_current_time_msec(data->t_zero),data->philo_id);
-		printf("%dms:philo %d eating\n",get_current_time_msec(data->t_zero),data->philo_id);
+		lock_and_print(data->print_mutex, "%dms:philo %d has taking right fork\n", data->t_zero, data->philo_id );
+		lock_and_print(data->print_mutex, "%dms:philo %d eating\n", data->t_zero, data->philo_id );
 		usleep(data->argv_data->time_to_eat * 1000);
 		pthread_mutex_unlock(data->left_fork);
 		pthread_mutex_unlock(data->right_fork);
 		data->times_ate++;
 		data->last_ate = get_current_time_msec(data->t_zero);
-		printf("%dms:philo %d sleeping\n", get_current_time_msec(data->t_zero),data->philo_id);
+		lock_and_print(data->print_mutex, "%dms:philo %d sleeping\n", data->t_zero, data->philo_id );
 		usleep(data->argv_data->time_to_sleep * 1000);
-		printf("%dms:philo %d thinking\n",get_current_time_msec(data->t_zero),data->philo_id);
+		lock_and_print(data->print_mutex, "%dms:philo %d thinking\n", data->t_zero, data->philo_id );
 	}
 	
 	// exit(0);
@@ -65,8 +73,12 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 {
 	t_argv *argv_data;
 	pthread_mutex_t *fork_list;
+	pthread_mutex_t *print_mutex;
 	int i;
-
+	
+	print_mutex = malloc(sizeof(pthread_mutex_t));
+	
+	pthread_mutex_init(print_mutex, NULL);
 	
 	i = 0;
 	if (args_error(argv, argc))
@@ -81,7 +93,7 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 	*philo_data = malloc(sizeof(t_philo )  * argv_data->number_of_philo);
 	while (i <  argv_data->number_of_philo)
 	{
-
+		(*philo_data)[i].print_mutex = print_mutex;
 		(*philo_data)[i].left_fork = &fork_list[i];
 		(*philo_data)[i].philo_id = i + 1;
 		(*philo_data)[i].right_fork = &fork_list[(i + 1) % argv_data->number_of_philo];
@@ -90,6 +102,7 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 	}
 	return (0);
 }
+
 
 void check_deaths(t_philo *philo_data, int t_zero)
 {
@@ -104,8 +117,11 @@ void check_deaths(t_philo *philo_data, int t_zero)
 		while (i < philo_data->argv_data->number_of_philo)
 		{
 			if (get_current_time_msec(t_zero) - philo_data[i].last_ate > philo_data[i].argv_data->time_to_die) 
-			{
-				printf("%d ms: philo %d DIED\n",get_current_time_msec(t_zero), philo_data[i].philo_id);
+			{		
+				// pthread_mutex_lock(philo_data->print_mutex);
+				lock_and_print(philo_data->print_mutex, "%d ms: philo %d DIED\n", philo_data->t_zero, philo_data->philo_id );
+		// pthread_mutex_unlock(philo_data->print_mutex);
+				// printf("%d ms: philo %d DIED\n",get_current_time_msec(t_zero), philo_data[i].philo_id);
 				return ;
 			}
 			if (philo_data->argv_data->number_of_eats != -1)
@@ -119,8 +135,11 @@ void check_deaths(t_philo *philo_data, int t_zero)
 		}
 		if (ate_flag == 0 && philo_data->argv_data->number_of_eats != -1)
 		{
-			printf("EVERYONE ATE atleast %d times\n", philo_data->argv_data->number_of_eats);
-			return;
+
+			lock_and_print(philo_data->print_mutex, "%dms :EVERYONE ATE atleast %d times\n", philo_data->t_zero, philo_data->argv_data->number_of_eats );
+			// sleep(5);
+			// printf("%dms :EVERYONE ATE atleast %d times\n", get_current_time_msec(t_zero), philo_data->times_ate);		
+			return ;
 		}
 		ate_flag = 0;
 		i = 0;

@@ -17,6 +17,7 @@ typedef struct s_argv {
 typedef struct s_philo {
     pthread_mutex_t *right_fork;
     pthread_mutex_t *left_fork;
+    pthread_mutex_t *print_mutex;
     t_argv  *argv_data;
     int     philo_id;
     long    t_zero;
