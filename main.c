@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/03/02 10:28:03 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/03 15:19:39 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,19 +31,19 @@ void *func(void *vargp)
 	while(1)
 	{
 		pthread_mutex_lock(data->left_fork);
-		lock_and_print(data->print_mutex, "%dms:philo %d has taking left fork\n", data->t_zero, data->philo_id );
-
+		lock_and_print(data->print_mutex, "%d philo %d has taking left fork\n", data->t_zero, data->philo_id );
 		pthread_mutex_lock(data->right_fork);
-		lock_and_print(data->print_mutex, "%dms:philo %d has taking right fork\n", data->t_zero, data->philo_id );
-		lock_and_print(data->print_mutex, "%dms:philo %d eating\n", data->t_zero, data->philo_id );
+		lock_and_print(data->print_mutex, "%d philo %d has taking right fork\n", data->t_zero, data->philo_id );
+		
+		lock_and_print(data->print_mutex, "%d philo %d eating\n", data->t_zero, data->philo_id );
 		usleep(data->argv_data->time_to_eat * 1000);
 		pthread_mutex_unlock(data->left_fork);
 		pthread_mutex_unlock(data->right_fork);
 		data->times_ate++;
 		data->last_ate = get_current_time_msec(data->t_zero);
-		lock_and_print(data->print_mutex, "%dms:philo %d sleeping\n", data->t_zero, data->philo_id );
+		lock_and_print(data->print_mutex, "%d philo %d sleeping\n", data->t_zero, data->philo_id );
 		usleep(data->argv_data->time_to_sleep * 1000);
-		lock_and_print(data->print_mutex, "%dms:philo %d thinking\n", data->t_zero, data->philo_id );
+		lock_and_print(data->print_mutex, "%d philo %d thinking\n", data->t_zero, data->philo_id );
 	}
 	
 	// exit(0);
@@ -69,17 +69,34 @@ int		fetch_fork_data(pthread_mutex_t **forks, int n_philo)
 	return (0);
 }
 
-int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
+void	fetch_philo_data(t_philo **philo_data, pthread_mutex_t **fork_list, t_argv *argv_data)
+{
+	int i;
+	pthread_mutex_t *print_mutex;
+
+	i = 0;
+	print_mutex = malloc(sizeof(pthread_mutex_t));
+	pthread_mutex_init(print_mutex, NULL);
+	while (i <  argv_data->number_of_philo)
+	{
+		(*philo_data)[i].print_mutex = print_mutex;
+		(*philo_data)[i].philo_id = i + 1;
+		(*philo_data)[i].argv_data = argv_data;
+		(*philo_data)[i].left_fork = &(*fork_list)[i];
+		// exit(0);
+		(*philo_data)[i].right_fork = &(*fork_list)[(i + 1) % argv_data->number_of_philo];
+		// % argv_data->number_of_philo
+		i++;
+	}
+	// exit(0);
+}
+
+int     fetch_philos_data(t_philo **philo_data, char **argv, int argc)
 {
 	t_argv *argv_data;
 	pthread_mutex_t *fork_list;
-	pthread_mutex_t *print_mutex;
 	int i;
-	
-	print_mutex = malloc(sizeof(pthread_mutex_t));
-	
-	pthread_mutex_init(print_mutex, NULL);
-	
+
 	i = 0;
 	if (args_error(argv, argc))
 	{
@@ -91,15 +108,7 @@ int     fetch_philo_data(t_philo **philo_data, char **argv, int argc)
 	if (fetch_fork_data(&fork_list, argv_data->number_of_philo) == 1)
 		return (1);
 	*philo_data = malloc(sizeof(t_philo )  * argv_data->number_of_philo);
-	while (i <  argv_data->number_of_philo)
-	{
-		(*philo_data)[i].print_mutex = print_mutex;
-		(*philo_data)[i].left_fork = &fork_list[i];
-		(*philo_data)[i].philo_id = i + 1;
-		(*philo_data)[i].right_fork = &fork_list[(i + 1) % argv_data->number_of_philo];
-		(*philo_data)[i].argv_data = argv_data;
-		i++;
-	}
+	fetch_philo_data(philo_data, &fork_list, argv_data);
 	return (0);
 }
 
@@ -135,8 +144,8 @@ void check_deaths(t_philo *philo_data, int t_zero)
 		}
 		if (ate_flag == 0 && philo_data->argv_data->number_of_eats != -1)
 		{
-
-			lock_and_print(philo_data->print_mutex, "%dms :EVERYONE ATE atleast %d times\n", philo_data->t_zero, philo_data->argv_data->number_of_eats );
+			pthread_mutex_lock(philo_data->print_mutex);
+			printf("%dms :EVERYONE ATE atleast %d times\n", get_current_time_msec(philo_data->t_zero), philo_data->argv_data->number_of_eats);
 			// sleep(5);
 			// printf("%dms :EVERYONE ATE atleast %d times\n", get_current_time_msec(t_zero), philo_data->times_ate);		
 			return ;
@@ -171,6 +180,7 @@ int	start_philos(t_philo *philo_data)
 	t_zero = get_t_zero();
 	// printf("--%d--\n", philo_data[i].argv_data->number_of_philo);
 	create_philo_set(0, philo_data, t_zero);
+	usleep(100); // 2
 	create_philo_set(1, philo_data, t_zero);
 	// i = 0;
 	// while (i < philo_data->argv_data->number_of_philo)
@@ -187,7 +197,7 @@ int main(int argc, char **argv)
 
 	t_philo *philo_data;
 
-	if (fetch_philo_data(&philo_data, argv, argc) == 1)
+	if (fetch_philos_data(&philo_data, argv, argc) == 1)
 		return (1);
 	// printf("test : %d\n", philo_data[0].argv_data->number_of_philo);
 	start_philos(philo_data);
