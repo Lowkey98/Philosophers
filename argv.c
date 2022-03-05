@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/24 12:40:11 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/25 15:43:36 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/05 11:48:19 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,9 @@
 int fetch_argv_data(t_argv **argv_data, char **argv)
 {
 
-	*argv_data = malloc(sizeof(t_argv));	
+	*argv_data = malloc(sizeof(t_argv));
+	if (*argv_data == NULL)
+		return (1);	
 	(*argv_data)->number_of_philo = ft_atoi(argv[1]);
 	(*argv_data)->time_to_die = ft_atoi(argv[2]);
 	(*argv_data)->time_to_eat = ft_atoi(argv[3]);
