@@ -6,7 +6,7 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/21 19:55:03 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/03/03 15:19:39 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/05 09:55:39 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,35 +20,54 @@ pthread_mutex_t	*lock_and_print(pthread_mutex_t *mutex, char *str, int arg_one, 
 		return (mutex);
 }
 
+int     get_current_time_usec()
+{
+	struct timeval  tv;
+	
+	gettimeofday(&tv, NULL);
+	return (tv.tv_sec * 1000000 + tv.tv_usec);
+}
+
+void	ft_usleep(int	period)
+{
+	int end_time;
+
+	
+	end_time = get_current_time_usec() + period;
+
+	// usleep(period - 2000);
+	while(get_current_time_usec() < end_time)
+	{
+		
+		// if (get_current_time_usec() > end_time)
+		// 	return;
+		usleep(500);
+	}
+
+}
+
 void *func(void *vargp)
 {
-	// printf("-------------\n");
 	t_philo *data;
 
 	data = vargp; 
 
-	// printf("times ate %d\n", data->argv_data->number_of_eats);
 	while(1)
 	{
 		pthread_mutex_lock(data->left_fork);
 		lock_and_print(data->print_mutex, "%d philo %d has taking left fork\n", data->t_zero, data->philo_id );
 		pthread_mutex_lock(data->right_fork);
 		lock_and_print(data->print_mutex, "%d philo %d has taking right fork\n", data->t_zero, data->philo_id );
-		
+		data->last_ate = get_current_time_msec(data->t_zero);
 		lock_and_print(data->print_mutex, "%d philo %d eating\n", data->t_zero, data->philo_id );
-		usleep(data->argv_data->time_to_eat * 1000);
+		ft_usleep(data->argv_data->time_to_eat * 1000);
 		pthread_mutex_unlock(data->left_fork);
 		pthread_mutex_unlock(data->right_fork);
 		data->times_ate++;
-		data->last_ate = get_current_time_msec(data->t_zero);
 		lock_and_print(data->print_mutex, "%d philo %d sleeping\n", data->t_zero, data->philo_id );
-		usleep(data->argv_data->time_to_sleep * 1000);
+		ft_usleep(data->argv_data->time_to_sleep * 1000);
 		lock_and_print(data->print_mutex, "%d philo %d thinking\n", data->t_zero, data->philo_id );
 	}
-	
-	// exit(0);
-	
-	// printf("value =%d\n", a);
 	return NULL;
 }
 
@@ -83,12 +102,9 @@ void	fetch_philo_data(t_philo **philo_data, pthread_mutex_t **fork_list, t_argv 
 		(*philo_data)[i].philo_id = i + 1;
 		(*philo_data)[i].argv_data = argv_data;
 		(*philo_data)[i].left_fork = &(*fork_list)[i];
-		// exit(0);
 		(*philo_data)[i].right_fork = &(*fork_list)[(i + 1) % argv_data->number_of_philo];
-		// % argv_data->number_of_philo
 		i++;
 	}
-	// exit(0);
 }
 
 int     fetch_philos_data(t_philo **philo_data, char **argv, int argc)
@@ -128,7 +144,7 @@ void check_deaths(t_philo *philo_data, int t_zero)
 			if (get_current_time_msec(t_zero) - philo_data[i].last_ate > philo_data[i].argv_data->time_to_die) 
 			{		
 				// pthread_mutex_lock(philo_data->print_mutex);
-				lock_and_print(philo_data->print_mutex, "%d ms: philo %d DIED\n", philo_data->t_zero, philo_data->philo_id );
+				lock_and_print(philo_data->print_mutex, "%d ms: philo %d DIED\n", philo_data->t_zero, philo_data[i].philo_id );
 		// pthread_mutex_unlock(philo_data->print_mutex);
 				// printf("%d ms: philo %d DIED\n",get_current_time_msec(t_zero), philo_data[i].philo_id);
 				return ;
