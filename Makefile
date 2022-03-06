@@ -1,7 +1,7 @@
 CC		= gcc
 CFLAGS	= -Wall -Werror -Wextra  #-fsanitize=thread -g
 NAME	= philo
-SRC		= main.c ft_atoi.c ft_putstr_fd.c time.c argv.c
+SRC		= philo.c free.c data.c main.c utils.c time.c argv.c
 
 all: $(NAME)
 

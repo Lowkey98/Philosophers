@@ -6,18 +6,17 @@
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/02/24 12:40:11 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/03/05 11:48:19 by ayafdel          ###   ########.fr       */
+/*   Updated: 2022/03/06 10:21:01 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "philosophers.h"
+#include "philosophers.h"
 
-int fetch_argv_data(t_argv **argv_data, char **argv)
+int	fetch_argv_data(t_argv **argv_data, char **argv)
 {
-
 	*argv_data = malloc(sizeof(t_argv));
 	if (*argv_data == NULL)
-		return (1);	
+		return (1);
 	(*argv_data)->number_of_philo = ft_atoi(argv[1]);
 	(*argv_data)->time_to_die = ft_atoi(argv[2]);
 	(*argv_data)->time_to_eat = ft_atoi(argv[3]);
@@ -27,32 +26,30 @@ int fetch_argv_data(t_argv **argv_data, char **argv)
 		(*argv_data)->number_of_eats = ft_atoi(argv[5]);
 	return (0);
 }
-int		arg_error(char *str)
+
+int	arg_error(char *str)
 {
-	int i;
+	int	i;
 
 	i = 0;
+	if (ft_strlen(str) > 6)
+		return (1);
 	if (str[0] == '0' || str[0] == '\0')
 		return (1);
-
 	while (str[i] >= '0' && str[i] <= '9')
 	{
 		if (str[i + 1] == '\0')
 			return (0);
 		i++;
 	}
-	// printf("%s\n", str);
 	return (1);
 }
 
-int     args_error(char **argv, int argc)
+int	args_error(char **argv, int argc)
 {
-	int i;
-	int j;
+	int	i;
 
-	j = 0;
 	i = 1;
-	
 	if (argc != 5 && argc != 6)
 		return (1);
 	while (argv[i])

@@ -1,17 +1,44 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   ft_atoi.c                                          :+:      :+:    :+:   */
+/*   utils.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/02/23 16:50:26 by ayafdel           #+#    #+#             */
-/*   Updated: 2022/02/23 18:14:16 by ayafdel          ###   ########.fr       */
+/*   Created: 2022/03/06 08:37:45 by ayafdel           #+#    #+#             */
+/*   Updated: 2022/03/06 09:18:11 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
+#include <unistd.h>
 
-int     ft_atoi(const char *str)
+void	ft_putchar_fd(char c, int fd)
+{
+	write(fd, &c, 1);
+}
+
+void	ft_putstr_fd(char *s, int fd)
+{
+	if (!s)
+		return ;
+	while (*s)
+	{
+		ft_putchar_fd(*s, fd);
+		s++;
+	}
+}
+
+int	ft_strlen(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i] != '\0')
+		i++;
+	return (i);
+}
+
+int	ft_atoi(const char *str)
 {
 	int		i;
 	int		a;
@@ -20,7 +47,6 @@ int     ft_atoi(const char *str)
 	i = 0;
 	a = 1;
 	somme = 0;
-
 	while (str[i] <= 32 && str[i] > 0)
 		if (str[i++] == 27)
 			return (0);
